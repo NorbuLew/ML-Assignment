@@ -1,0 +1,12 @@
+# Other groups' sample submissions (~150 MB of video, not our work to republish)
+Resources/Sample_Assignment/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Office temp files
+~$*
