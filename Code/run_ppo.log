@@ -1,0 +1,228 @@
+Actions: {0: 'Hold', 1: 'Engage', 2: 'Incentive'}
+State dim: 24 | agent sees: 24
+torch: 2.12.1+cu130 | device: cpu
+Agent interface defined.
+5 archetypes defined: OfficeWorker, NightOwlStudent, NightShiftWorker, NormalStudent, Housewife
+CANEEnv defined.
+Eval protocol: 200 reserved episodes; training budget 600 episodes (~100,800 steps); 5 seeds.
+Fatigue after 15 consecutive sends: 0.9529 (saturates toward kappa/(1-lam) = 1.20, clipped at 1.0)
+Fatigue after 5 sends: 0.491 -> after 10 holds: 0.171
+AlwaysHold: reward=0.00, optout=0%  (pays only the fatigue-free baseline, earns nothing)
+AlwaysSend: reward=-86.58, optout=100%, mean episode length=30h of 168
+
+Environment sanity checks passed.
+Plotting conventions and myopic-optimal reference loaded.
+PPO_CONFIG: lr=0.0003, n_epochs=10, batch_size=64, n_steps=168, max_grad_norm=0.5, gamma=0.99, gae_lambda=0.95, clip_eps=0.2, vf_coef=0.5, ent_coef=0.01, hidden_sizes=(64, 64)
+ActorCritic defined.
+PPOAgent defined: PPOAgent(d_in=24, hidden=(64, 64), lr=0.0003, clip_eps=0.2, ent_coef=0.01)
+parameters: 11780
+act() -> (1, log_prob=-1.0995, value=+0.4478)
+greedy action stable across 100 calls: 0
+update() returned {} (empty until the rollout fills)
+7.1 interface conformance PASS
+truncated  final-step advantage = +6.2500  (bootstraps V(s')=5.0)
+terminated final-step advantage = +1.3000  (no bootstrap)
+difference = +4.9500 = gamma * V(s') = 4.9500
+7.2 GAE boundary handling PASS
+5 greedy episodes, learn=False -> reward -4.08, updates=0, buffer=0
+network parameters bit-identical before and after evaluation
+7.3 evaluation purity PASS
+optimal-action rate: first quarter 0.486 -> last quarter 0.888 (random = 0.333, optimum = 1.000)
+updates performed: 40   final entropy: 0.1719   approx_kl: 0.00405
+7.4 known-optimum learning PASS
+  class CANEEnv:                182 lines   identical
+  CANE_CONFIG = dict(            33 lines   identical
+  def run_episodes(              74 lines   identical
+  def train_and_evaluate(        58 lines   identical
+  def policy_snapshot(           16 lines   identical
+  class Agent(ABC):              56 lines   identical
+  def evaluate_baseline(         12 lines   identical
+  def archetype_curve(           23 lines   identical
+  evaluation protocol             4 lines   identical
+7.5 shared code identical to the LinUCB notebook PASS
+seed 0, run 1: +0.0000
+seed 0, run 2: +0.0000   (identical)
+seed 1:        +0.0000   (differs, as it should)
+7.6 reproducibility PASS
+3 registered: Fixed-18:00, Random, PPO
+  OfficeWorker     Fixed-18:00  reward     2.01  ctr 0.316  sends   7.00  optout 0.000
+  OfficeWorker     Random       reward  -121.53  ctr 0.070  sends  29.14  optout 0.995
+  OfficeWorker     PPO          reward     0.00  ctr 0.000  sends   0.00  optout 0.000
+  NightOwlStudent  Fixed-18:00  reward   -18.14  ctr 0.060  sends   7.00  optout 0.000
+  NightOwlStudent  Random       reward  -132.32  ctr 0.058  sends  31.00  optout 0.995
+  NightOwlStudent  PPO          reward     1.30  ctr 0.125  sends   1.14  optout 0.000
+  NightShiftWorker Fixed-18:00  reward    -4.18  ctr 0.238  sends   7.00  optout 0.000
+  NightShiftWorker Random       reward  -129.61  ctr 0.068  sends  31.14  optout 0.995
+  NightShiftWorker PPO          reward     0.00  ctr 0.000  sends   0.00  optout 0.000
+  NormalStudent    Fixed-18:00  reward    -7.39  ctr 0.197  sends   7.00  optout 0.000
+  NormalStudent    Random       reward  -133.41  ctr 0.064  sends  31.89  optout 0.995
+  NormalStudent    PPO          reward     0.00  ctr 0.000  sends   0.00  optout 0.000
+  Housewife        Fixed-18:00  reward    -7.62  ctr 0.194  sends   7.00  optout 0.000
+  Housewife        Random       reward  -111.60  ctr 0.098  sends  29.13  optout 0.990
+  Housewife        PPO          reward   -17.69  ctr 0.042  sends   7.06  optout 0.178
+
+[1019s for the full per-archetype sweep]
+
+OfficeWorker
+      agent  reward_mean  reward_sem_std      ctr  sends_per_episode  optout_rate
+Fixed-18:00        2.015           0.000    0.316              7.000        0.000
+        PPO        0.000           0.000    0.000              0.000        0.000
+     Random     -121.531           0.000    0.070             29.145        0.995
+
+NightOwlStudent
+      agent  reward_mean  reward_sem_std      ctr  sends_per_episode  optout_rate
+        PPO        1.303           2.914    0.125              1.135        0.000
+Fixed-18:00      -18.138           0.000    0.060              7.000        0.000
+     Random     -132.320           0.000    0.058             31.000        0.995
+
+archetype    Housewife  NightOwlStudent  NightShiftWorker  NormalStudent  OfficeWorker
+agent                                                                                 
+Fixed-18:00      -7.62           -18.14             -4.18          -7.39          2.01
+PPO             -17.69             1.30              0.00           0.00          0.00
+Random         -111.60          -132.32           -129.61        -133.41       -121.53
+
+A never-sending policy scores exactly 0.00. Any row below zero is losing
+more to send cost, fatigue and churn than it earns back in clicks.
+[51s]  updates=590, env steps=99,125
+OfficeWorker      reward -121.19 ->   -0.36   sends  27.7 ->   0.8   ctr 0.051 -> 0.235
+NightOwlStudent   reward -142.63 ->   +0.80   sends  37.5 ->   0.8   ctr 0.088 -> 0.375
+entropy    0.8335 -> 0.0731   (uniform = 1.0986, deterministic = 0)
+value loss 562.581 -> 3.542
+approx KL  0.00547 -> 0.00060   clip frac 0.089 -> 0.006
+OfficeWorker      action share hold/engage/incentive = 1.00/0.00/0.00   send rate at the 19:00 peak = 0.00
+NightOwlStudent   action share hold/engage/incentive = 0.99/0.00/0.01   send rate at the 23:00 peak = 0.00
+Reward by policy and by how much it is allowed to know
+(mixed = archetype hidden and redrawn each episode; the others are pinned)
+
+information                   policy    mixed  OfficeWorker  NightOwlStudent
+ privileged PrivilegedOracle(p>0.34)    27.92         39.96            15.62
+ privileged PrivilegedOracle(p>0.45)    13.18         22.33             5.42
+ observable           SmartFixed[19]    -4.31         11.46           -14.85
+ observable       SmartFixed[19, 20]    -9.38         22.33           -24.64
+ observable BeliefThreshold(cr>0.25)     0.00          0.00             0.00
+ observable ExploreExploit(48h,top1)   -10.39        -12.63           -16.60
+ observable               AlwaysHold     0.00          0.00             0.00
+    trained              Fixed-18:00      NaN          2.01           -18.14
+    trained                   Random      NaN       -121.53          -132.32
+    trained                      PPO      NaN          0.00             1.30
+
+sends per week, same layout
+                  policy  mixed_sends  OfficeWorker_sends  NightOwlStudent_sends
+PrivilegedOracle(p>0.34)        19.50               28.35                  12.62
+PrivilegedOracle(p>0.45)         5.38               10.37                   3.19
+          SmartFixed[19]         6.08                5.31                   6.59
+      SmartFixed[19, 20]        12.07               10.37                  12.81
+BeliefThreshold(cr>0.25)         0.00                0.00                   0.00
+ExploreExploit(48h,top1)        14.52               14.33                  14.14
+              AlwaysHold         0.00                0.00                   0.00
+             Fixed-18:00          NaN                7.00                   7.00
+                  Random          NaN               29.14                  31.00
+                     PPO          NaN                0.00                   1.14
+
+mixed             best privileged  +27.92   best observable   +0.00
+OfficeWorker      best privileged  +39.96   best observable  +22.33
+NightOwlStudent   best privileged  +15.62   best observable   +0.00
+
+Read the CTR column against the break-even. A send costs
+  W_send + W_fat*kappa/(1-lam) = 1.0 + 2.4 = 3.4,
+so it needs a click rate above 0.34 to pay for itself.
+Every observable policy above lands well under that; only the privileged
+one clears it, and it does so by knowing which user it is talking to.
+  trial  1/12  {'lr': 0.000673, 'clip_eps': 0.154, 'ent_coef': 0.00121, 'hidden_sizes': (32, 32)}  ->  +0.00
+  trial  2/12  {'lr': 0.001141, 'clip_eps': 0.283, 'ent_coef': 0.01634, 'hidden_sizes': (32, 32)}  ->  +0.00
+  trial  3/12  {'lr': 0.000888, 'clip_eps': 0.209, 'ent_coef': 0.07416, 'hidden_sizes': (32, 32)}  ->  -93.14
+  trial  4/12  {'lr': 0.000101, 'clip_eps': 0.271, 'ent_coef': 0.00117, 'hidden_sizes': (128, 128)}  ->  +0.00
+  trial  5/12  {'lr': 0.000888, 'clip_eps': 0.135, 'ent_coef': 0.05325, 'hidden_sizes': (32, 32)}  ->  +0.00
+  trial  6/12  {'lr': 0.000245, 'clip_eps': 0.185, 'ent_coef': 0.00114, 'hidden_sizes': (64, 64)}  ->  +0.00
+  trial  7/12  {'lr': 0.000145, 'clip_eps': 0.234, 'ent_coef': 0.0197, 'hidden_sizes': (32, 32)}  ->  +0.00
+  trial  8/12  {'lr': 0.000315, 'clip_eps': 0.299, 'ent_coef': 0.09155, 'hidden_sizes': (64, 64)}  ->  -85.25
+  trial  9/12  {'lr': 0.000778, 'clip_eps': 0.23, 'ent_coef': 0.02382, 'hidden_sizes': (128, 128)}  ->  -41.69
+  trial 10/12  {'lr': 0.00015, 'clip_eps': 0.244, 'ent_coef': 0.01124, 'hidden_sizes': (64, 64)}  ->  +0.00
+  trial 11/12  {'lr': 0.000253, 'clip_eps': 0.197, 'ent_coef': 0.06011, 'hidden_sizes': (32, 32)}  ->  +0.00
+  trial 12/12  {'lr': 0.000292, 'clip_eps': 0.214, 'ent_coef': 0.0044, 'hidden_sizes': (128, 128)}  ->  +0.00
+[910s]
+
+      lr  clip_eps  ent_coef hidden_sizes   reward      ctr    sends   optout
+   0.001     0.154     0.001     (32, 32)    0.000    0.000    0.000    0.000
+   0.001     0.283     0.016     (32, 32)    0.000    0.000    0.000    0.000
+   0.000     0.271     0.001   (128, 128)    0.000    0.000    0.000    0.000
+   0.001     0.135     0.053     (32, 32)    0.000    0.000    0.000    0.000
+   0.000     0.214     0.004   (128, 128)    0.000    0.000    0.000    0.000
+   0.000     0.185     0.001     (64, 64)    0.000    0.000    0.000    0.000
+   0.000     0.234     0.020     (32, 32)    0.000    0.000    0.000    0.000
+   0.000     0.244     0.011     (64, 64)    0.000    0.000    0.000    0.000
+
+Check the sends column: a configuration that never sends scores exactly 0,
+which beats any policy that sends badly. That is a real result, not a bug,
+but it is a degenerate optimum and should be reported as one.
+best: lr=0.000673  clip_eps=0.154  ent_coef=0.00121  hidden=(32, 32)  ->  +0.00  (sends 0.00/week)
+NOTE: the winning configuration never sends. It is the degenerate
+optimum, not a policy, and is reported rather than adopted.
+[59s]
+Reward under perturbed dynamics (all agents trained on the baseline only)
+
+agent                          Fixed-18:00      PPO   Random
+perturbation                                                
+baseline                             -8.19    -1.05  -117.48
+recovers faster (lam .85)            -3.08    -0.45  -189.58
+recovers slower (lam .95)           -22.45    -2.74  -104.37
+sends 50% more tiring               -16.20    -2.13   -98.51
+fatigue bites harder (mu 1.0)        -8.19    -1.05  -133.30
+churn twice as costly                -8.19    -1.05  -151.25
+
+reward spread across perturbations (smaller = more robust):
+agent
+PPO               2.29
+Fixed-18:00      19.37
+Random           91.07
+[200s]
+95% confidence intervals (t-interval, sample sd, ddof=1)
+
+      agent  n     mean       sd   ci_low  ci_high
+        PPO  5    -0.21     0.47    -0.80     0.37
+Fixed-18:00  5    -8.19     0.00    -8.19    -8.19
+     Random  5  -118.41     3.39  -122.62  -114.20
+
+A deterministic policy scored on the identical held-out episodes has no
+seed variance by construction, so its interval collapses to a point. That
+is a property of the baseline, not evidence that it is precisely estimated.
+Pairwise comparisons
+
+learner    baseline     diff  welch_p    mwu_U    mwu_p  ci_separated
+    PPO Fixed-18:00   7.9773   0.0000  25.0000   0.0056          True
+    PPO      Random 118.1983   0.0000  25.0000   0.0097          True
+
+With n = 5 per group the smallest attainable two-sided Mann-Whitney p
+is 0.0079. U at its maximum therefore means complete rank separation
+-- every seed of one method beating every seed of the other -- not a
+stronger claim than the sample size can support. The Welch test is
+reported alongside it rather than in place of it.
+/mnt/c/CLAUDE USE/.venv/lib/python3.10/site-packages/scipy/stats/_axis_nan_policy.py:586: RuntimeWarning: Precision loss occurred in moment calculation due to catastrophic cancellation. This occurs when the data are nearly identical. Results may be unreliable.
+  res = hypotest_fun_out(*samples, **kwds)
+Mixed population, greedy reward per 168-hour week
+
+         agent   reward                          source
+Oracle(p>0.30)    30.90 quoted from the LinUCB notebook
+    AlwaysHold     0.00    degenerate never-send policy
+           PPO    -0.21         measured here (5 seeds)
+   Fixed-18:00    -8.19         measured here (5 seeds)
+ LinUCB-onehot   -35.90 quoted from the LinUCB notebook
+        Random  -118.41         measured here (5 seeds)
+wrote results/ppo_results.csv  (35 rows)
+wrote 5 model files to models/
+
+      archetype       agent  seed  reward_mean      ctr  sends_per_episode  optout_rate
+   OfficeWorker Fixed-18:00     0        2.015    0.316              7.000        0.000
+   OfficeWorker      Random     0     -121.531    0.070             29.145        0.995
+   OfficeWorker         PPO     0        0.000    0.000              0.000        0.000
+   OfficeWorker         PPO     1        0.000    0.000              0.000        0.000
+   OfficeWorker         PPO     2        0.000    0.000              0.000        0.000
+   OfficeWorker         PPO     3        0.000    0.000              0.000        0.000
+   OfficeWorker         PPO     4        0.000    0.000              0.000        0.000
+NightOwlStudent Fixed-18:00     0      -18.138    0.060              7.000        0.000
+python      3.10.12 (Linux)
+numpy       2.2.6
+pandas      2.3.3
+matplotlib  3.10.9
+scipy       1.15.3
+torch       2.12.1+cu130 (device=cpu)
