@@ -10,3 +10,7 @@ venv/
 
 # Office temp files
 ~$*
+
+# System-generated resource tools
+.resource_tools/
+
