@@ -1,0 +1,26 @@
+[
+  {
+    "archetype": "OfficeWorker",
+    "best_variant": "baseline",
+    "best_reward": 0.0,
+    "fixed_reward": 2.015,
+    "beats_never_send": false,
+    "beats_fixed_schedule": false
+  },
+  {
+    "archetype": "NightShiftWorker",
+    "best_variant": "baseline",
+    "best_reward": 0.0,
+    "fixed_reward": -4.183,
+    "beats_never_send": false,
+    "beats_fixed_schedule": true
+  },
+  {
+    "archetype": "NormalStudent",
+    "best_variant": "baseline",
+    "best_reward": 0.0,
+    "fixed_reward": -7.387,
+    "beats_never_send": false,
+    "beats_fixed_schedule": true
+  }
+]

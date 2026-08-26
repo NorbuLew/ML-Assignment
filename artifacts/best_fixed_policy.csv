@@ -1,0 +1,6 @@
+archetype,best_hour,action,reward,ctr,sends
+OfficeWorker,20,Engage,7.53,0.385,7.0
+NightOwlStudent,23,Incentive,2.18,0.547,7.0
+NightShiftWorker,16,Engage,2.64,0.324,7.0
+NormalStudent,16,Engage,0.54,0.298,7.0
+Housewife,13,Engage,7.25,0.383,7.0

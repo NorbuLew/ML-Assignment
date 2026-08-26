@@ -14,3 +14,14 @@ venv/
 # System-generated resource tools
 .resource_tools/
 
+
+# Run logs -- regenerated on every run_all.py, and noisy in diffs
+logs/
+
+# Editor/tool backups
+*.bak
+
+# Scratch renders from tools/render_simulation_video.py smoke tests
+artifacts/smoke_test.mp4
+artifacts/frame_check.png
+artifacts/frame_demo.png

@@ -1,0 +1,27 @@
+# CANE — Context-Aware Notification Engine
+# Python 3.11.  Install torch from the CPU index (see README): no GPU is needed.
+numpy>=2.0
+pandas>=2.2
+matplotlib>=3.9
+scipy>=1.14
+torch>=2.4
+
+# Streamlit 1.38+ for the `width="stretch"` chart/dataframe argument; the older
+# `use_container_width` it replaced is deprecated.
+streamlit>=1.38
+
+# Altair 5.5 is a hard floor, not a preference: dashboard/lib/theme.py registers
+# the chart theme with the `@alt.theme.register` decorator, which does not exist
+# before 5.5. The 5.4 API (`alt.themes.register`) is deprecated and would raise
+# AttributeError here.
+altair>=5.5
+
+ipykernel>=6.29
+
+# ---------------------------------------------------------------------------
+# Versions this project was actually developed and graded against, for anyone
+# reproducing it later. Pin to these if a newer release changes behaviour.
+#
+#   numpy 2.4.6      pandas 3.0.5      matplotlib 3.11.1   scipy 1.17.1
+#   torch 2.13.0+cpu streamlit 1.62.0  altair 6.2.2        ipykernel 7.3.0
+# ---------------------------------------------------------------------------

@@ -1,0 +1,49 @@
+variant,archetype,seed,reward_mean,ctr,sends_per_episode,optout_rate,train_seconds,note
+Fixed-18:00,NightShiftWorker,0,-4.182538894149646,0.23785714285714285,7.0,0.0,0.0,non-learning reference
+baseline,NightShiftWorker,0,0.0,0.0,0.0,0.0,286.7,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,NightShiftWorker,1,0.0,0.0,0.0,0.0,332.9,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,NightShiftWorker,2,0.0,0.0,0.0,0.0,348.1,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+high_floor,NightShiftWorker,0,0.0,0.0,0.0,0.0,349.0,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,NightShiftWorker,1,0.0,0.0,0.0,0.0,235.3,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,NightShiftWorker,2,0.0,0.0,0.0,0.0,326.4,never stop exploring: epsilon floor raised 0.05 -> 0.20
+optimistic_send,NightShiftWorker,0,0.0,0.0,0.0,0.0,335.6,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,NightShiftWorker,1,0.0,0.0,0.0,0.0,313.7,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,NightShiftWorker,2,0.0,0.0,0.0,0.0,333.7,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+slow_decay,NightShiftWorker,0,0.0,0.0,0.0,0.0,220.1,explore for 3x longer before committing
+slow_decay,NightShiftWorker,1,0.0,0.0,0.0,0.0,167.0,explore for 3x longer before committing
+slow_decay,NightShiftWorker,2,0.0,0.0,0.0,0.0,248.3,explore for 3x longer before committing
+warm_start,NightShiftWorker,0,0.0,0.0,0.0,0.0,276.1,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,NightShiftWorker,1,0.0,0.0,0.0,0.0,253.2,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,NightShiftWorker,2,0.0,0.0,0.0,0.0,308.2,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+Fixed-18:00,NormalStudent,0,-7.387218300399645,0.19714285714285715,7.0,0.0,0.0,non-learning reference
+baseline,NormalStudent,0,0.0,0.0,0.0,0.0,279.7,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,NormalStudent,1,0.0,0.0,0.0,0.0,275.7,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,NormalStudent,2,0.0,0.0,0.0,0.0,222.9,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+high_floor,NormalStudent,0,0.0,0.0,0.0,0.0,194.7,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,NormalStudent,1,0.0,0.0,0.0,0.0,162.4,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,NormalStudent,2,0.0,0.0,0.0,0.0,194.7,never stop exploring: epsilon floor raised 0.05 -> 0.20
+optimistic_send,NormalStudent,0,0.0,0.0,0.0,0.0,202.1,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,NormalStudent,1,0.0,0.0,0.0,0.0,195.7,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,NormalStudent,2,0.0,0.0,0.0,0.0,202.7,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+slow_decay,NormalStudent,0,0.0,0.0,0.0,0.0,113.8,explore for 3x longer before committing
+slow_decay,NormalStudent,1,-1.0150888552556274,0.2245762711864407,1.18,0.0,120.2,explore for 3x longer before committing
+slow_decay,NormalStudent,2,0.0,0.0,0.0,0.0,113.3,explore for 3x longer before committing
+warm_start,NormalStudent,0,0.0,0.0,0.0,0.0,195.1,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,NormalStudent,1,0.0,0.0,0.0,0.0,182.9,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,NormalStudent,2,0.0,0.0,0.0,0.0,187.4,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+Fixed-18:00,OfficeWorker,0,2.0147973871003533,0.31642857142857145,7.0,0.0,0.0,non-learning reference
+baseline,OfficeWorker,0,0.0,0.0,0.0,0.0,235.6,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,OfficeWorker,1,0.0,0.0,0.0,0.0,245.4,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+baseline,OfficeWorker,2,0.0,0.0,0.0,0.0,246.9,shipped config: epsilon 1.0 -> 0.05 over 50k steps
+high_floor,OfficeWorker,0,-1.2646677893108476,0.2774133083411434,10.67,0.0,192.0,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,OfficeWorker,1,0.0,0.0,0.0,0.0,163.1,never stop exploring: epsilon floor raised 0.05 -> 0.20
+high_floor,OfficeWorker,2,-0.01699981178911485,0.0,0.005,0.0,186.3,never stop exploring: epsilon floor raised 0.05 -> 0.20
+optimistic_send,OfficeWorker,0,0.0,0.0,0.0,0.0,255.2,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,OfficeWorker,1,0.0,0.0,0.0,0.0,281.8,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+optimistic_send,OfficeWorker,2,0.0,0.0,0.0,0.0,259.2,"Q-head bias +5 on the two send actions only, so ties break towards trying a send rather than towards silence"
+slow_decay,OfficeWorker,0,0.16713084989404783,0.3090909090909091,2.2,0.0,101.9,explore for 3x longer before committing
+slow_decay,OfficeWorker,1,-10.119651219051732,0.2407837071410157,19.395,0.0,102.2,explore for 3x longer before committing
+slow_decay,OfficeWorker,2,-1.135267205509359,0.25874125874125875,2.86,0.0,102.5,explore for 3x longer before committing
+warm_start,OfficeWorker,0,0.0,0.0,0.0,0.0,261.0,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,OfficeWorker,1,0.0,0.0,0.0,0.0,255.1,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
+warm_start,OfficeWorker,2,0.0,0.0,0.0,0.0,288.5,"replay buffer seeded with 40 episodes of Fixed-18:00 behaviour before training, so the agent has seen a competent sending policy rather than only random ones"
