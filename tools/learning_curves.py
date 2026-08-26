@@ -60,10 +60,38 @@ def evaluate(agent, env) -> dict:
             "sends": float(m["sends_per_episode"])}
 
 
+# Each algorithm's own winning configuration, from tools/tune_study.py and
+# tools/ppo_fix.py. They differ because the algorithms differ: the deep
+# Q-learners take a pre-seeded replay buffer, which PPO cannot use at all, and
+# PPO needs a raised entropy coefficient, which the Q-learners have no analogue
+# for. LinUCB has no tuned variant -- nothing in the study applies to a bandit.
+TUNED_HP = {
+    "dqn": dict(lr=3e-4, gamma=0.90, epsilon_end=0.08,
+                epsilon_decay_steps=60000, buffer_size=20000),
+    "ddqn": dict(lr=3e-4, gamma=0.90, epsilon_end=0.08,
+                 epsilon_decay_steps=60000, buffer_size=20000),
+    "ppo": dict(gamma=0.90, ent_coef=0.03),
+    "linucb": {},
+}
+
+
 def run_cell(kind: str, archetype: str, seed: int, episodes: int,
-             every: int) -> list[dict]:
+             every: int, tuned: bool = False) -> list[dict]:
     t0 = time.time()
-    agent = MAKERS[kind](seed=seed)
+    agent = MAKERS[kind](seed=seed, **(TUNED_HP[kind] if tuned else {}))
+
+    if tuned and hasattr(agent, "buffer"):
+        # Only the replay-based agents can be pre-seeded. Doing it here rather
+        # than inside the loop keeps the episode axis meaning the same thing
+        # for every curve on the chart.
+        from tools.preseed_study import preseed_buffer
+        preseed_buffer(agent, cane.CANEEnv(seed=2000 + seed,
+                                           archetype=archetype),
+                       1000, np.random.default_rng(seed))
+    if tuned and kind == "ppo":
+        from tools.ppo_fix import HOLD_PRIOR, set_action_prior
+        set_action_prior(agent, HOLD_PRIOR)
+
     train_env = cane.CANEEnv(seed=1000 + seed, archetype=archetype)
     eval_env = cane.CANEEnv(seed=7000 + seed, archetype=archetype)
 
@@ -119,6 +147,12 @@ def main() -> int:
     ap.add_argument("--episodes", type=int, default=cane.TRAIN_EPISODES)
     ap.add_argument("--every", type=int, default=25,
                     help="episodes between evaluation checkpoints")
+    ap.add_argument("--tuned", action="store_true",
+                    help="use each algorithm's winning configuration instead "
+                         "of its shipped defaults")
+    ap.add_argument("--out-suffix", default="",
+                    help="appended to the output filenames, so a tuned run "
+                         "does not overwrite the default-settings one")
     ap.add_argument("--jobs", type=int, default=0)
     args = ap.parse_args()
 
@@ -138,8 +172,8 @@ def main() -> int:
 
     rows = []
     with ProcessPoolExecutor(max_workers=jobs) as pool:
-        futs = {pool.submit(run_cell, k, a, s, args.episodes, args.every):
-                (k, a, s) for k, a, s in cells}
+        futs = {pool.submit(run_cell, k, a, s, args.episodes, args.every,
+                            args.tuned): (k, a, s) for k, a, s in cells}
         for i, f in enumerate(as_completed(futs), 1):
             got = f.result()
             rows += got
@@ -151,12 +185,12 @@ def main() -> int:
 
     df = pd.DataFrame(rows)
     OUT.mkdir(exist_ok=True)
-    df.to_csv(OUT / "learning_curves.csv", index=False)
+    df.to_csv(OUT / f"learning_curves{args.out_suffix}.csv", index=False)
 
     conv = (df.groupby(["agent", "archetype", "seed"])
               .apply(convergence_episode, include_groups=False)
               .rename("converged_at").reset_index())
-    conv.to_csv(OUT / "convergence.csv", index=False)
+    conv.to_csv(OUT / f"convergence{args.out_suffix}.csv", index=False)
 
     print()
     print("=" * 88)
@@ -175,7 +209,8 @@ def main() -> int:
     eff = conv.groupby("agent")["converged_at"].agg(["mean", "count"])
     print(eff.round(1).to_string())
     print()
-    print("wrote artifacts/learning_curves.csv and artifacts/convergence.csv")
+    print(f"wrote artifacts/learning_curves{args.out_suffix}.csv and "
+          f"artifacts/convergence{args.out_suffix}.csv")
     print("=" * 88)
     return 0
 

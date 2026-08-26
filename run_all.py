@@ -154,7 +154,16 @@ def build_stages() -> list[Stage]:
         Stage(
             name="curves",
             summary="learning curves and convergence speed",
-            commands=[[PY, "-u", "tools/learning_curves.py"]],
+            commands=[
+                [PY, "-u", "tools/learning_curves.py"],
+                # A second pass under each algorithm's winning configuration.
+                # The default-settings curves mostly sit at zero, which says
+                # what the shipped hyperparameters do but nothing about what
+                # the algorithms are capable of.
+                [PY, "-u", "tools/learning_curves.py", "--tuned",
+                 "--out-suffix", "_tuned", "--episodes", "1500",
+                 "--every", "50"],
+            ],
             quick_commands=[[PY, "-u", "tools/learning_curves.py",
                              "--episodes", "100", "--every", "25",
                              "--archetypes", "OfficeWorker", "Housewife"]],

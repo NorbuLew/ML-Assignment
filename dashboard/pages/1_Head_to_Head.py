@@ -16,6 +16,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -210,3 +211,105 @@ if by_arch is not None and archetype == "All":
     st.altair_chart(by_arch, width="content")
     st.caption("The same agents, per archetype. A flat 0.00 bar is a silent "
                "policy, not a failed run.")
+
+st.divider()
+
+# ---------------------------------------------------------------------------
+# Convergence speed
+# ---------------------------------------------------------------------------
+st.header("Sample efficiency: which algorithm gets there first?")
+
+st.markdown(
+    "Final reward says which algorithm ends up best. It says nothing about "
+    "which gets there first, and for a system that has to be trained against "
+    "real users those are different questions -- an agent needing three times "
+    "the episodes spends three times as long sending badly timed "
+    "notifications to real people."
+)
+
+
+@st.cache_data(show_spinner=False)
+def _curves(suffix: str):
+    root = Path(__file__).resolve().parents[2] / "artifacts"
+    c = root / f"learning_curves{suffix}.csv"
+    v = root / f"convergence{suffix}.csv"
+    return (pd.read_csv(c) if c.is_file() else pd.DataFrame(),
+            pd.read_csv(v) if v.is_file() else pd.DataFrame())
+
+
+# Two runs exist and they answer different questions. Defaults show what the
+# shipped hyperparameters do, which is mostly nothing; tuned shows what the
+# algorithms are capable of once the collapse is fixed. Showing only one of
+# them would misrepresent whichever question the reader had in mind.
+available = [(label, sfx) for label, sfx in
+             [("Tuned configuration", "_tuned"), ("Shipped defaults", "")]
+             if not _curves(sfx)[0].empty]
+
+if not available:
+    st.info("Run `python tools/learning_curves.py` to populate this section.")
+else:
+    labels = [lab for lab, _ in available]
+    pick = st.radio("Configuration", labels, index=0, horizontal=True)
+    suffix = dict(available)[pick]
+    curves, conv = _curves(suffix)
+
+    arch_opts = ["All"] + [a for a in theme.ARCHETYPE_ORDER
+                           if a in set(curves["archetype"])]
+    which = st.selectbox("Archetype", arch_opts, index=0, key="conv_arch")
+    cur = curves if which == "All" else curves[curves["archetype"] == which]
+
+    agents_here = [a for a in theme.AGENT_ORDER
+                   if a in {x.upper() for x in cur["agent"]}]
+    scale = alt.Scale(domain=agents_here,
+                      range=[theme.AGENT_COLOUR[a] for a in agents_here])
+
+    line = alt.Chart(cur).mark_line(strokeWidth=2).encode(
+        x=alt.X("episode:Q", title="training episodes"),
+        y=alt.Y("mean(reward):Q", title="greedy reward on held-out episodes"),
+        color=alt.Color("agent:N", scale=scale,
+                        legend=alt.Legend(title=None, orient="top")),
+        tooltip=["agent", "episode", alt.Tooltip("mean(reward):Q",
+                                                 format=".2f")],
+    ).properties(height=320)
+    st.altair_chart(line, width="stretch")
+    st.caption(
+        "Each point is the frozen policy evaluated greedily, so these curves "
+        "track what was *learned* rather than the noisy exploring policy that "
+        "generated it. Averaged over archetypes when 'All' is selected."
+    )
+
+    if not conv.empty:
+        eff = (conv.dropna(subset=["converged_at"])
+                   .groupby("agent")["converged_at"]
+                   .agg(["mean", "count"])
+                   .rename(columns={"mean": "episodes to converge",
+                                    "count": "archetypes that converged"}))
+        c1, c2 = st.columns([2, 3])
+        with c1:
+            st.dataframe(eff.round(0), width="stretch")
+        with c2:
+            st.markdown(
+                "Converged means the first checkpoint reaching 90% of that "
+                "agent's **own** final reward and never dropping back. "
+                "Measuring against each agent's own ceiling rather than a "
+                "shared reward level is deliberate: a shared threshold "
+                "flatters whichever algorithm scores highest and says nothing "
+                "about speed.\n\n"
+                "An agent missing from this table never rose above zero on any "
+                "archetype, so it has no ceiling to converge to. Reporting a "
+                "number for it would invent one."
+            )
+
+        st.warning(
+            "**Read these figures as a lower bound, for two reasons.** The "
+            "reward curves are noisy on a plateau, and 'never drops back' is "
+            "only satisfied once the noise ends -- which pushes the reported "
+            "episode toward the end of the budget even for an agent that "
+            "effectively converged much earlier. And Double DQN was still "
+            "improving at the final checkpoint (about +0.8 reward per 50 "
+            "episodes over the last six), so 1500 episodes was not enough to "
+            "find its ceiling. DQN had flattened. The honest conclusion is "
+            "that both are slow to converge on this task and that the budget "
+            "used everywhere else in this project, 600 episodes, is well short "
+            "of convergence."
+        )
