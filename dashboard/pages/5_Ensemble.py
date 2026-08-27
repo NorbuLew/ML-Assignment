@@ -35,6 +35,19 @@ st.caption("Members are fitted on a validation split (seeds 920,000-920,099) "
            "that is disjoint from the 200 test episodes, so the mixture weights "
            "never see the numbers they are judged on.")
 
+# The member rewards below do not match the Overview leaderboard, and that is a
+# difference of agent rather than of measurement. The leaderboard trains one
+# specialist per archetype; the ensemble loads the saved checkpoints, which were
+# trained on the mixed population with the archetype resampled each episode.
+# Saying so here stops the two pages reading as a contradiction -- and the gap
+# between them is itself the RQ3 result, that one policy for everybody is worse
+# than one policy per person.
+st.caption("Members here are the saved checkpoints, trained on the **mixed "
+           "population** with the archetype hidden and resampled every episode. "
+           "The Overview leaderboard reports per-archetype specialists instead, "
+           "so member rewards on this page are lower and are not directly "
+           "comparable to it.")
+
 ens = data.load_ensemble()
 sweep = data.load_bias_sweep()
 meta = data.load_ensemble_meta()

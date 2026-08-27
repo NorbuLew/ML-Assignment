@@ -42,15 +42,26 @@ torch.set_num_threads(1)
 # ==========================================================================
 
 # --- Configuration ----------------------------------------------------------
+# Kept in step with the DQN notebook, which had moved on without this copy. The
+# symptom was subtle: studies driven through this package showed DQN sending
+# exactly 7 notifications a week on most archetypes, which is precisely the
+# minimum-contact quota of one per day and therefore means the agent chose to
+# send nothing at all -- the wrapper was doing every send. At gamma=0.99 over a
+# 168-step episode that is the correct policy, because a send's discounted
+# fatigue tail outweighs a click that pays once.
+#
+# `tools/config_parity.py` now checks this automatically. `parity_check.py`
+# could not: it compares the deterministic baseline rows, which do not depend
+# on any learner's hyperparameters.
 DQN_CONFIG = dict(
-    lr=1e-4,                  # Adam learning rate
+    lr=3e-4,                  # Adam learning rate            (was 1e-4)
     batch_size=64,            # Minibatch size
     max_grad_norm=0.5,        # Gradient clipping norm
-    gamma=0.99,               # Discount factor
+    gamma=0.90,               # Discount factor               (was 0.99)
     epsilon_start=1.0,        # Initial exploration rate
-    epsilon_end=0.05,         # Final exploration rate
-    epsilon_decay_steps=50000,# Linear decay duration in steps
-    buffer_size=10000,        # Replay buffer capacity
+    epsilon_end=0.08,         # Final exploration rate        (was 0.05)
+    epsilon_decay_steps=60000,# Linear decay duration in steps(was 50000)
+    buffer_size=20000,        # Replay buffer capacity        (was 10000)
     min_replay_size=1000,     # Warmup steps before learning
     target_update_freq=500,   # Target network hard update frequency
     hidden_sizes=(64, 64),    # Q-network hidden layer dimensions
@@ -259,15 +270,26 @@ class DQNAgent(Agent):
 # ==========================================================================
 
 # --- Configuration ----------------------------------------------------------
+# Kept in step with section 1 of the Double DQN notebook. The two had diverged:
+# the notebook was retuned after its first full run collapsed to never-send and
+# this copy was not, so every study driven through this package went on
+# reproducing the collapse while the notebook's own results showed the fix.
+#
+# gamma is the lever. Over a 168-step episode at gamma=0.99 the discounted tail
+# of a send's fatigue cost is worth on the order of a hundred steps of future
+# debt against a click that pays once, and silence is then the correct answer.
+# At 0.90 that tail is worth roughly ten steps and contact becomes affordable.
+# The other four values come with it, and match the DQN notebook, so the two
+# value-based agents stay tuned alike.
 DDQN_CONFIG = dict(
-    lr=1e-4,                  # Adam learning rate
+    lr=3e-4,                  # Adam learning rate            (was 1e-4)
     batch_size=64,            # Minibatch size
     max_grad_norm=0.5,        # Gradient clipping norm
-    gamma=0.99,               # Discount factor
+    gamma=0.90,               # Discount factor               (was 0.99)
     epsilon_start=1.0,        # Initial exploration rate
-    epsilon_end=0.05,         # Final exploration rate
-    epsilon_decay_steps=50000,# Linear decay duration in steps
-    buffer_size=10000,        # Replay buffer capacity
+    epsilon_end=0.08,         # Final exploration rate        (was 0.05)
+    epsilon_decay_steps=60000,# Linear decay duration in steps(was 50000)
+    buffer_size=20000,        # Replay buffer capacity        (was 10000)
     min_replay_size=1000,     # Warmup steps before learning
     target_update_freq=500,   # Target network hard update frequency
     hidden_sizes=(64, 64),    # Q-network hidden layer dimensions

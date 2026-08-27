@@ -32,3 +32,10 @@ debug.log
 # Pre-edit notebook backups from the comment/findings pass -- a local safety
 # net, not part of the submission
 submission/.nb_backup/
+
+# Duplicate copy of the DQN folder, byte-identical to DQN/ itself
+DQN/DQN/
+
+# Reference video from another group, kept locally for style only -- same
+# reasoning as Resources/Sample_Assignment/ above: not our work to republish
+Resources/Smart_IrriGo.mp4
