@@ -25,3 +25,10 @@ logs/
 artifacts/smoke_test.mp4
 artifacts/frame_check.png
 artifacts/frame_demo.png
+
+# Ad-hoc debug output
+debug.log
+
+# Pre-edit notebook backups from the comment/findings pass -- a local safety
+# net, not part of the submission
+submission/.nb_backup/

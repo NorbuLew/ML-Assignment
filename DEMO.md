@@ -44,6 +44,18 @@ and it is the thing a bar chart gets wrong: a `0.00` in a results table looks
 like a broken run, and watching it happen shows it is a decision -- the agent
 is choosing to hold.
 
+To get silent lanes reliably, pick **Double DQN (default settings)** or **PPO
+(default settings)** from the Policy dropdown -- both stay quiet on all five.
+**DQN (default settings)** sends on one lane of five. **LinUCB** sends on all
+five, and **Tuned Double DQN** on four -- use that one to show the fix.
+
+One thing to have ready, because it looks like a contradiction. This page runs
+per-archetype checkpoints from `tools/train_demo_agents.py`; the Overview
+leaderboard reads the four notebooks' own result files. They are different
+training runs, so DQN can be near-silent here and not silent there. That is not
+an inconsistency to hide -- it is the instability the Diagnosis page concludes
+with, visible in two places at once.
+
 Scrub the slider back to an interesting hour to freeze the frame while you talk.
 
 ## 3. Personalisation  (~70s)
@@ -55,22 +67,52 @@ exhaustive search proved was best for them. Grey tick is their true best hour;
 the coloured marks are what the agent picked. Distance along the axis is the
 error, in hours.
 
-Read the numbers off the screen. Under the tuned configuration three of five
-users are contacted within an hour of their own best time and the agent picks
-four distinct hours across five people. Random timing averages a six-hour error.
+The **Run** selector at the top defaults to the tuned run. Leave it there --
+that is the result the project reports. The minimum-contact run below it is the
+earlier, shorter budget, and it is what the quota discussion further down the
+page describes.
+
+Read the numbers off the screen. Under the tuned run three of five users are
+contacted within an hour of their own best time, the agent picks four distinct
+hours across five people, and the mean timing error is 1.2 hours. Random timing
+averages six.
+
+Do not skip the fourth card: **users contacted, four of five.** The agent stayed
+silent all week on the NightShiftWorker, and that cell is counted in the
+denominator of every figure above rather than dropped from it. Say so before
+anyone asks -- an average computed only over the users an agent chose to talk to
+is not a personalisation result.
 
 Say plainly what is not being claimed: these are per-archetype agents, so this
 is personalisation by training, not one policy inferring who it is talking to.
 That stricter question is RQ3 and the answer there is no.
 
-Also read the honesty panel out loud -- the cells where the agent sent exactly
-the quota are cells where the deadline chose, not the policy. Naming that is
-worth more than quoting the better-looking average.
+Then the honesty panel. On the tuned run **no cell sent exactly the quota** --
+every contacted user got more than the seven-per-week minimum, so the timing on
+this page is the policy's choice rather than the daily deadline's. That is the
+stronger version of the claim, and it is worth saying that the panel exists to
+catch the opposite case: switch the Run selector to the minimum-contact run and
+most cells sit exactly on the quota, where the deadline chose and the agent only
+picked which message to send.
 
 ## 4. Diagnosis  (~80s)
 
-This page answers *why* three users received nothing, and it is the strongest
+This page answers *why* some users received nothing, and it is the strongest
 Part B material in the project.
+
+**Read the opening line off the screen, do not recite it.** It is computed from
+the result files, and as of the last pull it reads: NightShiftWorker,
+NormalStudent and OfficeWorker received nothing from **Double DQN and PPO** --
+six of twenty agent-user pairs. LinUCB and DQN contacted everyone.
+
+If someone asks why DQN is not on that list when it was silent on the Live
+Simulation page, the honest answer is the good one: those are two different
+training runs of the same code. The notebook was re-run and DQN went from silent
+on three users to sending on all five, without a single line of config changing;
+the demo checkpoints on page 2 are from the earlier run and are still quiet.
+That is direct evidence for the conclusion this page lands on -- the collapse is
+an undertraining artefact, not a property of the algorithm. Offer it before
+anyone digs for it.
 
 Three beats, in order:
 
