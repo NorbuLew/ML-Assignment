@@ -1,0 +1,196 @@
+[0] BMDS2114 Machine Learning — Reinforcement Learning Assignment
+[1] Context-Aware Notification Engine (CANE): A Reinforcement Learning Approach to Fatigue-Aware Push-Notification Pacing for User-Engagement Optimization
+[2] Part 1 — Problem Framing, Environment & Agent Definition, and Algorithm Selection
+[3] Domain: User Engagement Optimization
+[4] i. Problem Framing and Overview
+[5] 1.1 Overview of the proposed system
+[6] The proposed system, the Context-Aware Notification Engine (CANE), is a platform-side decision agent that governs the push-notification channel of a mobile application (in the style of a social, e-commerce, or content app). At each decision point the agent observes the user’s current context and chooses one of three actions — send an Engagement Nudge, send an Incentive Nudge, or Hold (stay silent) — so as to sustain long-term engagement rather than maximise the response to any single message. Crucially, the decision is purely a communication-timing and message-type problem at the platform layer: the engine never authors or reasons about the subject-matter of the content, only about whether and when an interruption is worthwhile given the user’s evolving state. This keeps the work squarely within the human–computer-interaction / platform-mechanics scope of the User Engagement Optimization domain.
+[7] Figure 1.0: Reinforcement-learning interaction loop for the Context-Aware Notification Engine.
+[8] 1.2 Why optimising user engagement matters
+[9] Retention and revenue: push notifications are a primary lever for bringing users back into an app, and notification quality has a direct, measured effect on daily-active-users and retention in production systems (Yuan et al., 2022; Cai et al., 2023).
+[10] Notification fatigue: poorly timed or excessive notifications annoy users and cause them to ignore, mute, or disable notifications entirely — a largely irreversible loss of the channel (Cai et al., 2023).
+[11] Trust and user experience: the value of a notification depends on context and on the history of prior notifications; sending at the wrong moment erodes trust, whereas well-timed relevance preserves it (Ho et al., 2018; Liao et al., 2020).
+[12] Engagement is therefore not about sending more notifications, but about sending the right notification at the right moment — and, just as often, about choosing to stay silent.
+[13] 1.3 How Reinforcement Learning helps
+[14] Deciding whether to notify is a sequential decision-making problem under uncertainty (Sutton & Barto, 2018): each notification changes the user’s fatigue and trust, which in turn changes how the next notification will be received. A myopic, response-prediction model optimises only the immediate click and will tend to over-send, because the negative effects (fatigue, opt-out) are deferred to the future (Cai et al., 2023). Reinforcement Learning (RL) instead learns a policy that maximises long-term cumulative engagement, explicitly trading a click now against the risk of fatigue-driven churn later. Because the agent learns from per-user feedback, it adapts its pacing to each user rather than applying one global schedule (Yuan et al., 2022).
+[15] 1.4 Related work and research gap
+[16] Study
+[17] Method / focus
+[18] Relevance to CANE
+[19] Ho et al. (2018), UbiComp
+[20] RL agent decides send-vs-stay-silent from sensed user context; trained against a simulated user behaviour + response model.
+[21] Direct precedent for an RL send/hold timing agent and for a simulated-user environment.
+[22] Tomkins et al. (2021), Machine Learning
+[23] Practical Thompson sampling (IntelligentPooling) for mobile-health notification decisions, pooling data across users for sample efficiency.
+[24] Justifies a contextual-bandit baseline for notification decisions and its sample-efficiency advantage.
+[25] Cai et al. (2023), WWW
+[26] RL that directly optimises long-term user retention at billion-user scale, rather than the immediate interaction.
+[27] Supports the long-horizon MDP framing and the churn-dominated reward ordering, with opt-out as the terminal event.
+[28] Prabhakar et al. (2022), KDD
+[29] Offline RL with a Double-DQN / Conservative-Q method; multi-objective notification optimisation.
+[30] Basis for our multi-objective scalarised reward and for Double DQN as an algorithm.
+[31] Yuan et al. (2022), CIKM
+[32] Offline RL for mobile notifications; argues impact must be attributed to a sequence, not a single push.
+[33] Confirms the sequential, history-dependent framing and the need for state memory.
+[34] Liao et al. (2020), IMWUT
+[35] Online RL deployed in the HeartSteps V2 study, deciding several times a day whether to deliver a context-tailored suggestion.
+[36] Confirms whether-and-when-to-notify is learnable in deployment, with context and accumulated burden as key signals.
+[37] Research gap. Existing systems tend to be either (i) myopic response-prediction or volume-control models that optimise the immediate open, or (ii) bandit formulations that treat each notification independently and so cannot reason about how accumulated fatigue compounds across many steps. Production RL studies that do model the sequence are almost exclusively offline and report a single deployed method. Few course-scale studies place a fatigue-aware reward inside a fully interactive environment and compare a progression of modern RL algorithms (bandit → value-based → improved value-based → policy-based) on the identical task, with Q-Learning deliberately excluded. CANE targets exactly this gap.
+[38] 1.5 Problem statement
+[39] Conventional notification systems are static and context-blind: they fire on fixed schedules (e.g., a daily 6:00 p.m. push to every user) regardless of whether the user is asleep, at work, already active in the app, or already saturated with recent alerts. This produces two failure modes — (1) wasted communication, where notifications are sent at moments the user will ignore, and (2) fatigue-driven attrition, where cumulative over-messaging drives the user to mute or uninstall. Rule-based heuristics cannot capture the sequential, compounding nature of attention: a notification’s value depends on the history of prior notifications and the user’s current state (Yuan et al., 2022; Cai et al., 2023). The agent must learn an adaptive pacing policy that maximises long-term engagement while explicitly penalising fatigue.
+[40] What the RL agent must learn. The agent must learn, per user, the optimal action at each timestep — Hold, Engagement Nudge, or Incentive Nudge — conditioned on time of day, day of week, current in-app activity, accumulated notification fatigue, and recency of the last notification, so as to maximise long-term engagement (clicks and sustained sessions) while avoiding fatigue-driven opt-out. It must learn this purely from interaction with a simulated user population and generalise across users with different daily routines without per-user retraining.
+[41] 1.6 Research questions
+[42] RQ1. Can reinforcement learning improve long-term user engagement through fatigue-aware notification pacing, relative to fixed-schedule and random baselines?
+[43] RQ2. Among LinUCB, DQN, Double DQN, and PPO, which achieves the best engagement–fatigue trade-off, and does the bandit baseline measurably under-perform the full-MDP methods?
+[44] RQ3. Does a single learned policy adapt its pacing to distinct user archetypes (e.g., daytime vs. night-active routines) without per-user retraining?
+[45] 1.7 Objectives related to the RL framework
+[46] To design an RL agent that learns a notification-pacing policy maximising long-term engagement (clicks, sustained sessions, retention) rather than the immediate response to a single push.
+[47] To build a simulated user-population environment with five hidden behavioural archetypes (a 9-to-5 Office Worker, a Night-Owl Student, a Night-Shift Worker, a Normal Student, and a flexible Housewife), each with a different time-dependent click propensity and fatigue tolerance, so the agent must infer responsiveness implicitly from reward alone.
+[48] To design an explainable multi-objective reward (click reward − sending cost − fatigue penalty − churn penalty, plus a retention-streak shaping term) whose magnitudes are justified by their relative ordering and by the literature, not chosen arbitrarily.
+[49] To implement, compare, and justify four techniques — LinUCB, DQN, Double DQN, and PPO (Q-Learning excluded; SARSA deliberately avoided) — against two non-adaptive baselines: a fixed daily-6 p.m. schedule and a random sender.
+[50] To evaluate primarily on cumulative reward, click-through rate, and retention (opt-out) rate, with supporting metrics (notification volume, convergence speed, and the per-hour Hold/Send decision distribution), and to verify the learned policy generalises across all five archetypes.
+[51] ii. Environment and Agent Definition
+[52] The table below summarises the five core RL elements; detailed definitions, formulas, and references follow in the sub-sections.
+[53] Component
+[54] Description (this topic)
+[55] Reference / basis
+[56] Agent
+[57] Notification policy that observes user context and selects one of {Hold, Engagement, Incentive} to maximise discounted engagement return.
+[58] Ho et al. (2018); Cai et al. (2023)
+[59] Environment
+[60] Simulated user population (5 hidden archetypes) + app, with a fatigue dynamics model and a click/churn response model.
+[61] Ho et al. (2018); Liao et al. (2020)
+[62] State
+[63] s = [h, d, A, F, ρ]: hour, day, in-app activity, fatigue, recency of last notification.
+[64] Yuan et al. (2022); Cai et al. (2023)
+[65] Action
+[66] a ∈ {0 Hold, 1 Engagement Nudge, 2 Incentive Nudge}.
+[67] Tomkins et al. (2021); Ho et al. (2018)
+[68] Reward
+[69] Click reward − send cost − fatigue penalty − churn penalty + retention-streak shaping.
+[70] Hayes et al. (2022); Prabhakar et al. (2022); Sutton & Barto (2018)
+[71] 2.1 Agent
+[72] The agent is the platform’s notification scheduler. At each timestep it observes the state vector and outputs a single discrete action. A single shared-parameter policy is used for the whole population; the state vector provides the personalisation signal, following the per-user RL framing of Ho et al. (2018). The agent’s goal is to maximise the expected discounted engagement return (defined in sub-section 2.5).
+[73] 2.2 Environment
+[74] The environment is a custom, OpenAI-Gym-style simulator implemented in Python. It is not a static dataset: RL requires an interactive environment that responds to actions and returns feedback, so user behaviour is generated by probabilistic models whose parameters are calibrated from the notification literature rather than sampled from a fixed table (Ho et al., 2018; Liao et al., 2020). At each step the environment (i) decides whether the user clicks, (ii) updates fatigue and recency, and (iii) decides whether the user opts out. To make personalisation visible, five archetypes are defined, each with a different time-of-day responsiveness; each archetype is hidden from the agent, so the agent must infer it from reward feedback.
+[75] Figure 1.3: Five hidden user archetypes with different time-of-day responsiveness (environment design).
+[76] Office Worker (9–5): largely unresponsive during work hours; receptive at the morning commute, around lunch, and in the evening.
+[77] Night-Owl Student: peaks late at night (roughly 22:00–02:00) and is quiet through the morning.
+[78] Night-Shift Worker: a phase-inverted routine — asleep through much of the daytime, receptive in the late afternoon before a shift and in the early morning after it.
+[79] Normal Student: in class during the day; receptive after school and during evening study breaks, and asleep by around midnight.
+[80] Housewife: the most time-flexible — high daytime availability in the mid-morning and early afternoon, with a dip around family / dinner hours.
+[81] Click / response model (the data generator)
+[82] When the agent sends action a the probability that the user clicks and starts a session is modelled as a calibrated, fatigue-attenuated propensity, in line with the calibrated user-response models used in RL notification studies (Ho et al., 2018):
+[83] P(click | s, a) = clip( p0(arch, h, d) · (1 − μ·F) · w(a) , 0, 1 )
+[84] p0(arch, h, d) is the archetype’s baseline responsiveness at the current time; (1 − μ·F) is the fatigue attenuation; and w(a) is the relevance weight of the message type (w(Hold)=0). Each factor is grounded in a cited mechanism, and the absolute scale is fixed during calibration so that baseline open rates match published ranges.
+[85] Fatigue dynamics
+[86] The environment maintains fatigue as an internal accumulation–recovery process. Each send raises fatigue; each Hold lets it decay (Liao et al., 2020; Trella et al., 2022):
+[87] F(t+1) = clip( λ·F(t) + κ·𝟙{a ≠ 0} , 0, 1 ),   0 < λ < 1
+[88] The recovery factor λ = 0.90 keeps fatigue slow to forget, while the per-send increment κ = 0.15 is moderate, so that repeated sends compound into high fatigue faster than Holds can dissipate it — exactly the asymmetry that makes over-messaging dangerous.
+[89] Figure 1.2: Fatigue accumulation–recovery mechanism — sends build fatigue, Holds let it recover.
+[90] Churn model
+[91] Sustained high fatigue raises the probability of opt-out/uninstall, a terminal event that ends all future reward (Cai et al., 2023):
+[92] P(opt-out | F) = σ( γ₀ + γ₁·F ),   triggered only while F exceeds a fatigue threshold
+[93] where σ is the logistic function. Because opt-out removes the channel permanently, its penalty must dominate the reward (sub-section 2.5).
+[94] 2.3 State
+[95] The state observed at each step is a compact, fully-observable vector of behavioural and temporal signals:
+[96] s = [ h , d , A , F , ρ ]
+[97] h = hour of day (0–23), encoded cyclically as (sin, cos) so 23:00 and 00:00 are adjacent;
+[98] d = day of week (0–6), capturing weekday/weekend routine differences;
+[99] A ∈ {0,1} = whether the user is currently active in-app (sending to an already-active user is usually wasteful);
+[100] F ∈ [0,1] = fatigue level (normalised, decaying count of notifications in the trailing 48-hour window);
+[101] ρ = recency of the last notification (normalised time since last send).
+[102] Figure 1.1: The state vector and the three-action space.
+[103] 2.4 Action
+[104] At each timestep the agent selects exactly one discrete action:
+[105] a ∈ { 0 = Hold , 1 = Engagement Nudge , 2 = Incentive Nudge }
+[106] Only three actions — small enough that value-based methods learn quickly, yet representative of a real channel decision. Treating Hold as a first-class action is essential for fatigue-aware pacing: it is what lets the agent deliberately let fatigue recover (Liao et al., 2020).
+[107] 2.5 Reward
+[108] Immediate reward. The per-step reward is a multi-objective scalarisation of the competing goals (Hayes et al., 2022; Prabhakar et al., 2022):
+[109] r_imm = R_click·C − W_send·S − W_fat·F − R_churn·U
+[110] C = 1 if the user clicks and starts a session within a 2-hour window;
+[111] S = 1 if any notification was sent (a ≠ 0) — a small per-send cost;
+[112] F = current fatigue — a soft penalty for operating the user in a high-fatigue regime;
+[113] U = 1 if the user opts out / uninstalls (terminal).
+[114] The magnitudes are fixed by their ordering (Sutton & Barto, 2018; Cai et al., 2023): R_churn ≫ R_click > W_fat > W_send. A representative setting is R_click = +10, W_send = 1, W_fat = 2, R_churn = 30. A single send carries a discounted fatigue debt of about W_fat·κ / (1−λ) = 2·0.15 / 0.10 = 3, well below the +10 click reward, so a well-timed send stays net-positive and the agent learns selective pacing rather than collapsing to an always-Hold policy.
+[115] Retention-streak reward shaping. A shaping bonus grows with the user’s current engagement streak, in the spirit of potential-based shaping (Sutton & Barto, 2018) and the long-term-engagement framing of Yuan et al. (2022):
+[116] R_streak = Σ(k=1..n) β^k ,   β = 1.15,   n = current engagement-streak length
+[117] The bonus collapses to 0 the moment the user lapses (no click for 36 hours) or opts out, encouraging the agent to keep the user continuously engaged.
+[118] Figure 1.4: Retention-streak reward-shaping concept; the bonus resets when the user lapses or opts out.
+[119] Overall reward and long-term objective. The agent maximises the expected discounted return, not the immediate reward — which is precisely why a full RL method, rather than a myopic predictor, is required:
+[120] r = r_imm + R_streak(t)        G = Σ(k=0..∞) γ^k · r(t+k+1) ,   γ ∈ (0,1)
+[121] iii. RL Algorithm Selection and Model Design
+[122] Four techniques are trained and compared on the identical environment: LinUCB, DQN, Double DQN, and PPO. They are not an arbitrary list — each addresses a specific limitation of the one before it, so the comparison itself demonstrates why a more capable agent is needed once fatigue must be tracked across steps rather than judged one step at a time. Two non-learning baselines (a fixed daily-6 p.m. schedule and a random sender) answer RQ1.
+[123] Figure 1.5: Algorithm progression — each method addresses a limitation of the previous one.
+[124] 3.1 LinUCB — contextual-bandit baseline
+[125] LinUCB selects the action with the highest linear reward estimate plus an exploration bonus, treating every decision independently with no memory of accumulated fatigue (Lattimore & Szepesvári, 2020); it is the natural formalisation of the bandit approach already used for notification decisions in deployed mobile-health systems (Tomkins et al., 2021):
+[126] p(t,a) = x(t,a)ᵀ θa + α · √( x(t,a)ᵀ Aa⁻¹ x(t,a) )
+[127] Because it ignores how reward depends on accumulated history, LinUCB is expected to over-send and under-perform once engagement is measured across steps — the direct evidence that a full-MDP method is required.
+[128] 3.2 Deep Q-Network (DQN)
+[129] DQN treats pacing as a full Markov Decision Process and learns an action-value function over the whole state, so it can capture how today’s send changes future fatigue, recency, and churn risk; a target network stabilises learning (Mnih et al., 2015):
+[130] L(θ) = E[ ( r + γ·max Q(s′,a′;θ⁻) − Q(s,a;θ) )² ]
+[131] 3.3 Double DQN
+[132] Double DQN reduces DQN’s tendency to over-estimate action values — aggravated here by the asymmetric, occasionally-large rewards (the −30 churn penalty and the growing streak bonus) — by using the online network to select the next action and the target network to evaluate it (van Hasselt et al., 2016):
+[133] L(θ) = E[ ( r + γ·Q( s′, argmax Q(s′,a′;θ) ; θ⁻ ) − Q(s,a;θ) )² ]
+[134] 3.4 Proximal Policy Optimization (PPO)
+[135] PPO is the policy-based counterpart; its clipped objective keeps updates stable while the agent learns a (possibly stochastic) pacing policy that reasons over cumulative fatigue rather than a single isolated decision (Andrychowicz et al., 2021):
+[136] L_clip(θ) = E[ min( ᵣ(θ)·Â , clip( ᵣ(θ), 1−ε, 1+ε )·Â ) ]
+[137] 3.5 Algorithm justification (why these four)
+[138] LinUCB tests whether a stateless method suffices; its expected shortfall is direct empirical evidence that the engagement objective requires modelling long-term return.
+[139] DQN adds full state-transition modelling, capturing how a send today changes future fatigue and churn risk — the first method that can actually optimise the cross-step objective.
+[140] Double DQN targets DQN’s known value-over-estimation, which our asymmetric rewards aggravate; it tests whether a more reliable value estimate yields a safer pacing policy.
+[141] PPO represents the policy-gradient family, optimising the policy directly with stable clipped updates; it tests whether a policy-based method beats the value-based ones on this task.
+[142] Q-Learning is excluded per the assignment. SARSA is also deliberately avoided: as the on-policy sibling of Q-Learning its update is nearly identical, so it sits uncomfortably close to the excluded method, and being another value-based TD method it would add less algorithmic diversity than the bandit → MDP → policy-based span chosen here.
+[143] 3.6 Model design
+[144] [ TEAM TO CONFIRM against the notebook — fill in the actual architectures and hyperparameters used in your runs. The values below are placeholders to be replaced. ]
+[145] Hyperparameter
+[146] DQN
+[147] Double DQN
+[148] PPO
+[149] Network architecture
+[150] MLP: 5→__→__→3
+[151] MLP: 5→__→__→3
+[152] Actor →__; Critic →__
+[153] Discount factor γ
+[154] 0.99
+[155] 0.99
+[156] 0.99
+[157] Learning rate
+[158] __
+[159] __
+[160] __
+[161] Replay buffer size
+[162] __
+[163] __
+[164] —
+[165] Batch size
+[166] __
+[167] __
+[168] __
+[169] Target-update frequency
+[170] __
+[171] __
+[172] —
+[173] Exploration (ε start→end / decay)
+[174] __
+[175] __
+[176] entropy coef __
+[177] PPO clip ε
+[178] —
+[179] —
+[180] __
+[181] Optimizer
+[182] Adam
+[183] Adam
+[184] Adam
+[185] Training timesteps
+[186] 100,000
+[187] 100,000
+[188] 100,000
+[189] State preprocessing. The hour h is encoded cyclically as (sin, cos) so that 23:00 and 00:00 are adjacent; fatigue F and recency ρ are normalised to [0,1] before being fed to the network input layer.
+[190] 3.7 Other training strategies
+[191] Experience replay & target networks: a replay buffer decorrelates value-based updates and improves sample efficiency (Mnih et al., 2015).
+[192] Staged evaluation: agents are first validated on one archetype, then on the mixed five-archetype population, separating reward-design errors from learning-algorithm errors.
+[193] Exploration schedule: ε-greedy (value-based) and an entropy bonus (PPO) start exploratory and anneal as the policy converges.
+[194] Reward normalisation & seed averaging: returns are normalised and every result is averaged over multiple random seeds for stable, reproducible comparison.
+[195] Note: figures 1.0–1.5, the related-work table (§1.4) and the 5-element summary table (§ii) are embedded. Still to complete: the §3.6 hyperparameter values from the notebook. References cited above are listed in the team’s full reference list.
